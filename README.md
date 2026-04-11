@@ -1,38 +1,61 @@
 # SolarMonitor
 
-Small FoxESS experiments live here.
+Phase 1 is a small read-only FoxESS exploration tool with a reusable client layer and a console entry point.
 
-## ApiSmokeTest
+## Solution layout
 
-Console app for testing FoxESS Open API connectivity with the private API key header flow.
+- `src/SolarMonitor.Core`
+- `src/SolarMonitor.FoxEss`
+- `src/SolarMonitor.Console`
+- `tests/SolarMonitor.FoxEss.Tests`
 
-### Usage
+## Implemented endpoints
+
+- `POST /op/v0/device/list`
+- `GET /op/v1/device/detail?sn=...`
+- `POST /op/v1/device/real/query`
+
+## Console usage
 
 Set environment variables:
 
 ```powershell
 $env:FOXESS_API_KEY = "your-private-api-key"
-$env:FOXESS_INVERTER_SN = "optional-inverter-serial"
-dotnet run --project .\SolarMonitor\ApiSmokeTest\
+$env:FOXESS_INVERTER_SN = "your-inverter-serial"
 ```
 
-Or pass arguments:
+List devices:
 
 ```powershell
-dotnet run --project .\SolarMonitor\ApiSmokeTest\ -- --api-key "your-private-api-key" --sn "optional-inverter-serial"
+dotnet run --project .\src\SolarMonitor.Console\ -- devices
 ```
 
-The sample always calls `device/list` first. If an inverter serial number is provided, it also calls `GET /op/v1/device/detail?sn=...`.
-
-### Debug mode
-
-To print the path, timestamp, masked token, and generated signature:
+Get device detail:
 
 ```powershell
-dotnet run --project .\SolarMonitor\ApiSmokeTest\ -- --debug
+dotnet run --project .\src\SolarMonitor.Console\ -- detail
 ```
 
-FoxESS note:
+Get realtime values:
+
+```powershell
+dotnet run --project .\src\SolarMonitor.Console\ -- realtime
+```
+
+Get selected realtime variables:
+
+```powershell
+dotnet run --project .\src\SolarMonitor.Console\ -- realtime --variables SoC,invBatPower,pvPower
+```
+
+Or pass options directly:
+
+```powershell
+dotnet run --project .\src\SolarMonitor.Console\ -- detail --api-key "your-private-api-key" --sn "your-inverter-serial"
+```
+
+## FoxESS notes
 
 - The signature that worked in practice here uses the literal text `\\r\\n` between path, token, and timestamp.
-- Query endpoints are rate-limited to roughly one call per second per interface.
+- For query-string requests like `device/detail`, the request URL includes the query string but the signature is generated from the base path only.
+- Query endpoints are rate-limited to roughly one call per second per interface, and the client enforces a small minimum interval by default.
