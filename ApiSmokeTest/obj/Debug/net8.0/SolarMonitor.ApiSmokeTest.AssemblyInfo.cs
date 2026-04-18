@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SolarMonitor.ApiSmokeTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7dcb6f91d53faa3d9107fa69827f1d01979c3b97")]
 [assembly: System.Reflection.AssemblyProductAttribute("SolarMonitor.ApiSmokeTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SolarMonitor.ApiSmokeTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

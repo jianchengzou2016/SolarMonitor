@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{01B351A9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarMonitor.FoxEss.Tests", "tests\SolarMonitor.FoxEss.Tests\SolarMonitor.FoxEss.Tests.csproj", "{AE15241B-2F0A-4BFC-A58A-8475E23AFD4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarMonitor.App", "src\SolarMonitor.App\SolarMonitor.App.csproj", "{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{AE15241B-2F0A-4BFC-A58A-8475E23AFD4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE15241B-2F0A-4BFC-A58A-8475E23AFD4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE15241B-2F0A-4BFC-A58A-8475E23AFD4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{6A1492FD-5FA6-43A9-8E3F-5A914E2EEEB2} = {7D085A11-1609-436E-8FE3-41003C45A9FA}
 		{63E1294E-1111-47EB-AA61-C81FA08F790C} = {7D085A11-1609-436E-8FE3-41003C45A9FA}
 		{AE15241B-2F0A-4BFC-A58A-8475E23AFD4F} = {01B351A9-01A6-4B27-8A1F-75CF6D0B2C1A}
+		{A5B58723-BA89-4AB3-AC9E-4CFD056F46A8} = {7D085A11-1609-436E-8FE3-41003C45A9FA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9A0800B5-E964-4E3B-8A04-4AFE3614A053}

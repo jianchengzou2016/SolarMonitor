@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SolarMonitor.Core\SolarMonitor.Core.csproj" />
+    <ProjectReference Include="..\SolarMonitor.FoxEss\SolarMonitor.FoxEss.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\SolarMonitorIcon.png" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+</Project>

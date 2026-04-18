@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj": {}
+    "d:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj": {}
   },
   "projects": {
-    "D:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj": {
+    "d:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj",
+        "projectUniqueName": "d:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj",
         "projectName": "SolarMonitor.ApiSmokeTest",
-        "projectPath": "D:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj",
+        "projectPath": "d:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\SolarMonitor.ApiSmokeTest.csproj",
         "packagesPath": "C:\\Users\\winOS\\.nuget\\packages\\",
-        "outputPath": "D:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\obj\\",
+        "outputPath": "d:\\temp\\Documents\\Codex\\SolarMonitor\\ApiSmokeTest\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\winOS\\AppData\\Roaming\\NuGet\\NuGet.Config"

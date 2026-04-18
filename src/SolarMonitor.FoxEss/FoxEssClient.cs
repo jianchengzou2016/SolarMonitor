@@ -73,7 +73,7 @@ public sealed class FoxEssClient : IFoxEssGateway, IDisposable
 
         var body = new Dictionary<string, object?>
         {
-            ["sn"] = deviceSn
+            ["sns"] = new[] { deviceSn }
         };
 
         if (variables is { Count: > 0 })
