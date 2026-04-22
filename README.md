@@ -1,6 +1,10 @@
 # SolarMonitor
 
-Phase 1 is a small read-only FoxESS exploration tool with a reusable client layer and a console entry point.
+`SolarMonitor` is a small FoxESS monitoring app built around:
+- a reusable FoxESS client library
+- a console exploration tool
+- a WPF desktop app
+- Windows installer packaging with Inno Setup
 
 ## Solution layout
 
@@ -9,6 +13,8 @@ Phase 1 is a small read-only FoxESS exploration tool with a reusable client laye
 - `src/SolarMonitor.Console`
 - `src/SolarMonitor.App`
 - `tests/SolarMonitor.FoxEss.Tests`
+- `tests/SolarMonitor.App.Tests`
+- `packaging/windows`
 
 ## Implemented endpoints
 
@@ -16,7 +22,9 @@ Phase 1 is a small read-only FoxESS exploration tool with a reusable client laye
 - `GET /op/v1/device/detail?sn=...`
 - `POST /op/v1/device/real/query`
 
-## Console usage
+## Running locally
+
+### Console usage
 
 Set environment variables:
 
@@ -55,12 +63,6 @@ Launch the WPF app:
 dotnet run --project .\src\SolarMonitor.App\
 ```
 
-Build the Windows installer:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\packaging\windows\Build-SolarMonitorInstaller.ps1
-```
-
 Or pass options directly:
 
 ```powershell
@@ -80,9 +82,52 @@ dotnet run --project .\src\SolarMonitor.Console\ -- detail --api-key "your-priva
 - The FoxESS API key is stored separately in `%LocalAppData%\SolarMonitor\secrets.dat` using Windows DPAPI for the current user.
 - Existing `FOXESS_API_KEY` and `FOXESS_INVERTER_SN` environment variables are still used as fallback values when no saved settings exist yet.
 
+## Build the installer
+
+Build the Windows installer:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\packaging\windows\Build-SolarMonitorInstaller.ps1
+```
+
+Expected output:
+
+- published app files under `artifacts\publish\win-x64`
+- installer under `artifacts\installer`
+
+## Release versioning
+
+Installer and app packaging versioning are driven by `MinVer`, which reads git tags.
+
+Rules:
+
+- use annotated or lightweight git tags with the `v` prefix
+- example release tags:
+  - `v1.0.0`
+  - `v1.0.1`
+  - `v1.1.0`
+- if no matching tag exists, MinVer falls back to an auto-generated development version
+
+Typical release flow:
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+powershell -ExecutionPolicy Bypass -File .\packaging\windows\Build-SolarMonitorInstaller.ps1
+```
+
+If you want to build a specific version manually without creating a tag first:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\packaging\windows\Build-SolarMonitorInstaller.ps1 -Version 1.0.0
+```
+
+The generated installer filename follows this pattern:
+
+- `SolarMonitor-Setup-<version>-win-x64.exe`
+
 ## Installer notes
 
 - Installer packaging uses Inno Setup under `packaging\windows`.
-- Versioning is tag-driven through MinVer. Tags should use the `v` prefix, for example `v1.0.0`.
 - The installer checks for the .NET 8 Windows Desktop Runtime and can attempt installation with `winget` before continuing.
 - After installation, the wizard offers to launch `SolarMonitor`.
