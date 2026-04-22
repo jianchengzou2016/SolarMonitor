@@ -14,11 +14,13 @@ namespace SolarMonitor.App.ViewModels;
 
 public sealed class MainViewModel : INotifyPropertyChanged
 {
-    private const double MinimumChartWidth = 960;
+    private const double DailyChartWidth = 1440;
     private const double MinimumChartHeight = 320;
     private const double ChartTickStepKilowatts = 0.5;
     private const double HeightPerTick = 44;
-    private const double SampleSpacing = 28;
+    private const double ChartHorizontalPaddingPixels = 24;
+    private static readonly TimeSpan MaximumConnectedSampleGap = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan ConnectedSampleGapTolerance = TimeSpan.FromSeconds(30);
     private const int MaxTrendSamples = 180;
     private static readonly string TrendHistoryPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -43,17 +45,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _footerText = "Enter your FoxESS API key and inverter serial number, then load data.";
     private string _lastUpdatedText = "Not yet";
     private string _realtimeObservedText = "Realtime not loaded yet.";
-    private bool _isAutoRefreshEnabled;
+    private bool _isAutoRefreshEnabled = true;
     private RefreshIntervalOption _selectedRefreshInterval;
-    private PointCollection _homeUsageTrendPoints = [];
-    private PointCollection _derivedPvTrendPoints = [];
-    private PointCollection _gridImportTrendPoints = [];
-    private PointCollection _gridExportTrendPoints = [];
-    private double _chartCanvasWidth = MinimumChartWidth;
+    private ObservableCollection<PointCollection> _homeUsageTrendSegments = [];
+    private ObservableCollection<PointCollection> _derivedPvTrendSegments = [];
+    private ObservableCollection<PointCollection> _gridImportTrendSegments = [];
+    private ObservableCollection<PointCollection> _gridExportTrendSegments = [];
+    private double _chartCanvasWidth = DailyChartWidth;
     private double _chartCanvasHeight = MinimumChartHeight;
     private string _timeAxisStartLabel = "--:--";
     private string _timeAxisMiddleLabel = "--:--";
     private string _timeAxisEndLabel = "--:--";
+    private IReadOnlyList<RealtimeTrendSample> _chartSamples = Array.Empty<RealtimeTrendSample>();
+    private DateTime _chartRangeStart = DateTime.Today;
+    private DateTime _chartRangeEnd = DateTime.Today.AddDays(1);
 
     public MainViewModel()
         : this(ConnectionSettingsStore.CreateDefault())
@@ -72,7 +77,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             new RefreshIntervalOption("5 minutes", TimeSpan.FromMinutes(5))
         ];
 
-        _selectedRefreshInterval = RefreshIntervals[1];
+        _selectedRefreshInterval = RefreshIntervals[3];
         LoadConnectionSettings();
         LoadPersistedTrendHistory();
     }
@@ -212,28 +217,28 @@ public sealed class MainViewModel : INotifyPropertyChanged
         set => SetProperty(ref _selectedRefreshInterval, value);
     }
 
-    public PointCollection HomeUsageTrendPoints
+    public ObservableCollection<PointCollection> HomeUsageTrendSegments
     {
-        get => _homeUsageTrendPoints;
-        private set => SetProperty(ref _homeUsageTrendPoints, value);
+        get => _homeUsageTrendSegments;
+        private set => SetProperty(ref _homeUsageTrendSegments, value);
     }
 
-    public PointCollection DerivedPvTrendPoints
+    public ObservableCollection<PointCollection> DerivedPvTrendSegments
     {
-        get => _derivedPvTrendPoints;
-        private set => SetProperty(ref _derivedPvTrendPoints, value);
+        get => _derivedPvTrendSegments;
+        private set => SetProperty(ref _derivedPvTrendSegments, value);
     }
 
-    public PointCollection GridImportTrendPoints
+    public ObservableCollection<PointCollection> GridImportTrendSegments
     {
-        get => _gridImportTrendPoints;
-        private set => SetProperty(ref _gridImportTrendPoints, value);
+        get => _gridImportTrendSegments;
+        private set => SetProperty(ref _gridImportTrendSegments, value);
     }
 
-    public PointCollection GridExportTrendPoints
+    public ObservableCollection<PointCollection> GridExportTrendSegments
     {
-        get => _gridExportTrendPoints;
-        private set => SetProperty(ref _gridExportTrendPoints, value);
+        get => _gridExportTrendSegments;
+        private set => SetProperty(ref _gridExportTrendSegments, value);
     }
 
     public double ChartCanvasWidth
@@ -248,7 +253,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
         private set => SetProperty(ref _chartCanvasHeight, value);
     }
 
+    public IReadOnlyList<RealtimeTrendSample> ChartSamples => _chartSamples;
+
+    public DateTime ChartRangeStart => _chartRangeStart;
+
+    public DateTime ChartRangeEnd => _chartRangeEnd;
+
+    public double ChartHorizontalPadding => ChartHorizontalPaddingPixels;
+
     public TimeSpan RefreshInterval => SelectedRefreshInterval.Interval;
+
+    public bool HasConnectionDetails =>
+        !string.IsNullOrWhiteSpace(ApiKey) &&
+        !string.IsNullOrWhiteSpace(InverterSerialNumber);
 
     public string TimeAxisStartLabel
     {
@@ -368,20 +385,30 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (TrendSamples.Count == 0)
         {
-            HomeUsageTrendPoints = [];
-            DerivedPvTrendPoints = [];
-            GridImportTrendPoints = [];
-            GridExportTrendPoints = [];
-            ChartCanvasWidth = MinimumChartWidth;
+            HomeUsageTrendSegments = [];
+            DerivedPvTrendSegments = [];
+            GridImportTrendSegments = [];
+            GridExportTrendSegments = [];
+            _chartSamples = Array.Empty<RealtimeTrendSample>();
+            _chartRangeStart = DateTime.Today;
+            _chartRangeEnd = DateTime.Today.AddDays(1);
+            ChartCanvasWidth = DailyChartWidth;
             ChartCanvasHeight = MinimumChartHeight;
             RebuildAxisTicks(-0.5m, 1.5m);
-            TimeAxisStartLabel = "--:--";
-            TimeAxisMiddleLabel = "--:--";
-            TimeAxisEndLabel = "--:--";
+            TimeAxisStartLabel = DateTime.Today.ToString("dd MMM 00:00");
+            TimeAxisMiddleLabel = DateTime.Today.ToString("dd MMM 12:00");
+            TimeAxisEndLabel = DateTime.Today.ToString("dd MMM") + " 24:00";
             return;
         }
 
-        var allValues = TrendSamples
+        _chartSamples = TrendSamples
+            .OrderBy(sample => sample.Timestamp)
+            .ToArray();
+
+        _chartRangeStart = _chartSamples.First().Timestamp.Date;
+        _chartRangeEnd = _chartSamples.Last().Timestamp.Date.AddDays(1);
+
+        var allValues = _chartSamples
             .SelectMany(sample => new[] { sample.HomeUsagePower, sample.DerivedPvOutputPower, sample.GridImportPower, sample.GridExportPower })
             .DefaultIfEmpty(0m)
             .ToArray();
@@ -396,23 +423,29 @@ public sealed class MainViewModel : INotifyPropertyChanged
             axisMax = axisMin + 2.0m;
         }
 
-        ChartCanvasWidth = Math.Max(MinimumChartWidth, 40 + ((TrendSamples.Count - 1) * SampleSpacing));
+        var totalDays = Math.Max(1, (_chartRangeEnd - _chartRangeStart).TotalDays);
+        ChartCanvasWidth = Math.Max(DailyChartWidth, totalDays * DailyChartWidth);
         var tickCount = (int)Math.Round((double)((axisMax - axisMin) / (decimal)ChartTickStepKilowatts), MidpointRounding.AwayFromZero) + 1;
         ChartCanvasHeight = Math.Max(MinimumChartHeight, 40 + ((tickCount - 1) * HeightPerTick));
 
-        HomeUsageTrendPoints = BuildPoints(TrendSamples.Select(sample => sample.HomeUsagePower).ToArray(), axisMin, axisMax);
-        DerivedPvTrendPoints = BuildPoints(TrendSamples.Select(sample => sample.DerivedPvOutputPower).ToArray(), axisMin, axisMax);
-        GridImportTrendPoints = BuildPoints(TrendSamples.Select(sample => sample.GridImportPower).ToArray(), axisMin, axisMax);
-        GridExportTrendPoints = BuildPoints(TrendSamples.Select(sample => sample.GridExportPower).ToArray(), axisMin, axisMax);
+        HomeUsageTrendSegments = BuildSegments(_chartSamples, sample => sample.HomeUsagePower, axisMin, axisMax);
+        DerivedPvTrendSegments = BuildSegments(_chartSamples, sample => sample.DerivedPvOutputPower, axisMin, axisMax);
+        GridImportTrendSegments = BuildSegments(_chartSamples, sample => sample.GridImportPower, axisMin, axisMax);
+        GridExportTrendSegments = BuildSegments(_chartSamples, sample => sample.GridExportPower, axisMin, axisMax);
 
         RebuildAxisTicks(axisMin, axisMax);
 
-        TimeAxisStartLabel = TrendSamples.First().TimestampText;
-        TimeAxisMiddleLabel = TrendSamples[TrendSamples.Count / 2].TimestampText;
-        TimeAxisEndLabel = TrendSamples.Last().TimestampText;
+        var midpoint = _chartRangeStart + TimeSpan.FromTicks((_chartRangeEnd - _chartRangeStart).Ticks / 2);
+        TimeAxisStartLabel = _chartRangeStart.ToString("dd MMM HH:mm");
+        TimeAxisMiddleLabel = midpoint.ToString("dd MMM HH:mm");
+        TimeAxisEndLabel = _chartRangeEnd.ToString("dd MMM HH:mm");
     }
 
-    private PointCollection BuildPoints(IReadOnlyList<decimal> values, decimal minValue, decimal maxValue)
+    private ObservableCollection<PointCollection> BuildSegments(
+        IReadOnlyList<RealtimeTrendSample> samples,
+        Func<RealtimeTrendSample, decimal> valueSelector,
+        decimal minValue,
+        decimal maxValue)
     {
         var range = maxValue - minValue;
         if (range <= 0)
@@ -420,21 +453,69 @@ public sealed class MainViewModel : INotifyPropertyChanged
             range = 1;
         }
 
-        if (values.Count == 1)
+        if (samples.Count == 0)
         {
-            var y = MapValueToY(values[0], minValue, range, ChartCanvasHeight);
-            return [new Point(0, y), new Point(ChartCanvasWidth, y)];
+            return [];
         }
 
-        var points = new PointCollection(values.Count);
-        for (var index = 0; index < values.Count; index++)
+        var segments = new ObservableCollection<PointCollection>();
+
+        if (samples.Count == 1)
         {
-            var x = index * (ChartCanvasWidth / (values.Count - 1));
-            var y = MapValueToY(values[index], minValue, range, ChartCanvasHeight);
-            points.Add(new Point(x, y));
+            var value = valueSelector(samples[0]);
+            var y = MapValueToY(value, minValue, range, ChartCanvasHeight);
+            var x = MapTimestampToX(samples[0].Timestamp);
+            segments.Add([new Point(x - 1, y), new Point(x + 1, y)]);
+            return segments;
         }
 
-        return points;
+        var currentSegment = new PointCollection();
+        RealtimeTrendSample? previousSample = null;
+
+        foreach (var sample in samples)
+        {
+            if (previousSample is not null && sample.Timestamp - previousSample.Timestamp > MaximumConnectedSampleGap + ConnectedSampleGapTolerance)
+            {
+                if (currentSegment.Count > 0)
+                {
+                    segments.Add(currentSegment);
+                }
+
+                currentSegment = new PointCollection();
+            }
+
+            var x = MapTimestampToX(sample.Timestamp);
+            var y = MapValueToY(valueSelector(sample), minValue, range, ChartCanvasHeight);
+            currentSegment.Add(new Point(x, y));
+            previousSample = sample;
+        }
+
+        if (currentSegment.Count > 0)
+        {
+            if (currentSegment.Count == 1)
+            {
+                var point = currentSegment[0];
+                currentSegment = [new Point(point.X - 1, point.Y), new Point(point.X + 1, point.Y)];
+            }
+
+            segments.Add(currentSegment);
+        }
+
+        return segments;
+    }
+
+    private double MapTimestampToX(DateTime timestamp)
+    {
+        var totalRangeSeconds = Math.Max(1, (_chartRangeEnd - _chartRangeStart).TotalSeconds);
+        var clampedTimestamp = timestamp < _chartRangeStart
+            ? _chartRangeStart
+            : timestamp > _chartRangeEnd
+                ? _chartRangeEnd
+                : timestamp;
+
+        var offsetSeconds = (clampedTimestamp - _chartRangeStart).TotalSeconds;
+        var usableWidth = Math.Max(1, ChartCanvasWidth - (2 * ChartHorizontalPaddingPixels));
+        return ChartHorizontalPaddingPixels + ((offsetSeconds / totalRangeSeconds) * usableWidth);
     }
 
     private static double MapValueToY(decimal value, decimal minValue, decimal range, double chartHeight)
@@ -650,5 +731,5 @@ public sealed record RealtimeTrendSample(
     decimal GridImportPower,
     decimal GridExportPower)
 {
-    public string TimestampText => Timestamp.ToString("HH:mm");
+    public string TimestampText => Timestamp.ToString("dd MMM HH:mm");
 }

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         _refreshTimer.Tick += RefreshTimer_Tick;
         _refreshTimer.Interval = _viewModel.RefreshInterval;
+        Loaded += MainWindow_Loaded;
     }
 
     private async void LoadDevices_Click(object sender, RoutedEventArgs e)
@@ -33,6 +34,7 @@ public partial class MainWindow : Window
     {
         await RunAsync(_viewModel.LoadRealtimeAsync);
         UpdateRefreshTimer();
+        ScrollTrendToLatest();
     }
 
     private void RefreshInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -68,7 +70,7 @@ public partial class MainWindow : Window
 
     private async void RefreshTimer_Tick(object? sender, EventArgs e)
     {
-        if (_isRefreshingRealtime || !_viewModel.IsAutoRefreshEnabled)
+        if (_isRefreshingRealtime || !_viewModel.IsAutoRefreshEnabled || !_viewModel.HasConnectionDetails)
         {
             return;
         }
@@ -77,6 +79,7 @@ public partial class MainWindow : Window
         try
         {
             await RunAsync(_viewModel.LoadRealtimeAsync);
+            ScrollTrendToLatest();
         }
         finally
         {
@@ -88,7 +91,7 @@ public partial class MainWindow : Window
     {
         _refreshTimer.Interval = _viewModel.RefreshInterval;
 
-        if (_viewModel.IsAutoRefreshEnabled)
+        if (_viewModel.IsAutoRefreshEnabled && _viewModel.HasConnectionDetails)
         {
             _refreshTimer.Start();
         }
@@ -98,9 +101,14 @@ public partial class MainWindow : Window
         }
     }
 
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        ScrollTrendToLatest();
+    }
+
     private void TrendChartOverlay_MouseMove(object sender, MouseEventArgs e)
     {
-        if (_viewModel.TrendSamples.Count == 0 || sender is not FrameworkElement overlay)
+        if (_viewModel.ChartSamples.Count == 0 || sender is not FrameworkElement overlay)
         {
             HideTrendHover();
             return;
@@ -108,13 +116,13 @@ public partial class MainWindow : Window
 
         var mousePosition = e.GetPosition(overlay);
         var nearestIndex = GetNearestTrendIndex(mousePosition.X);
-        if (nearestIndex < 0 || nearestIndex >= _viewModel.TrendSamples.Count)
+        if (nearestIndex < 0 || nearestIndex >= _viewModel.ChartSamples.Count)
         {
             HideTrendHover();
             return;
         }
 
-        var sample = _viewModel.TrendSamples[nearestIndex];
+        var sample = _viewModel.ChartSamples[nearestIndex];
         var pointX = GetTrendPointX(nearestIndex);
 
         TrendHoverGuide.Visibility = Visibility.Visible;
@@ -122,7 +130,7 @@ public partial class MainWindow : Window
         TrendHoverGuide.X2 = pointX;
 
         TrendHoverText.Text =
-            $"{sample.Timestamp:HH:mm}\n" +
+            $"{sample.Timestamp:dd MMM yyyy HH:mm}\n" +
             $"Home usage: {sample.HomeUsagePower:0.###} kW\n" +
             $"Derived PV output: {sample.DerivedPvOutputPower:0.###} kW\n" +
             $"Grid Import: {sample.GridImportPower:0.###} kW\n" +
@@ -156,7 +164,7 @@ public partial class MainWindow : Window
 
     private int GetNearestTrendIndex(double x)
     {
-        var sampleCount = _viewModel.TrendSamples.Count;
+        var sampleCount = _viewModel.ChartSamples.Count;
         if (sampleCount == 0)
         {
             return -1;
@@ -167,25 +175,55 @@ public partial class MainWindow : Window
             return 0;
         }
 
-        var normalized = Math.Clamp(x / Math.Max(1, _viewModel.ChartCanvasWidth), 0, 1);
-        var index = (int)Math.Round(normalized * (sampleCount - 1), MidpointRounding.AwayFromZero);
-        return Math.Clamp(index, 0, sampleCount - 1);
+        var nearestIndex = 0;
+        var nearestDistance = double.MaxValue;
+
+        for (var index = 0; index < sampleCount; index++)
+        {
+            var pointX = GetTrendPointX(index);
+            var distance = Math.Abs(pointX - x);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestIndex = index;
+            }
+        }
+
+        return nearestIndex;
     }
 
     private double GetTrendPointX(int index)
     {
-        var sampleCount = _viewModel.TrendSamples.Count;
-        if (sampleCount <= 1)
+        var sampleCount = _viewModel.ChartSamples.Count;
+        if (sampleCount == 0)
         {
             return 0;
         }
 
-        return index * (_viewModel.ChartCanvasWidth / (sampleCount - 1));
+        var sample = _viewModel.ChartSamples[index];
+        var totalRangeSeconds = Math.Max(1, (_viewModel.ChartRangeEnd - _viewModel.ChartRangeStart).TotalSeconds);
+        var offsetSeconds = (sample.Timestamp - _viewModel.ChartRangeStart).TotalSeconds;
+        var usableWidth = Math.Max(1, _viewModel.ChartCanvasWidth - (2 * _viewModel.ChartHorizontalPadding));
+
+        if (sampleCount == 1)
+        {
+            return _viewModel.ChartHorizontalPadding + (usableWidth / 2);
+        }
+
+        return _viewModel.ChartHorizontalPadding + ((offsetSeconds / totalRangeSeconds) * usableWidth);
     }
 
     private void HideTrendHover()
     {
         TrendHoverGuide.Visibility = Visibility.Collapsed;
         TrendHoverCard.Visibility = Visibility.Collapsed;
+    }
+
+    private void ScrollTrendToLatest()
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            TrendScrollViewer?.ScrollToHorizontalOffset(TrendScrollViewer.ExtentWidth);
+        }, DispatcherPriority.Background);
     }
 }

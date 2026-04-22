@@ -178,20 +178,19 @@
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatterySohText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,0,10" Padding="12" CornerRadius="14" Background="#F8F0F0">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F8F0F0">
                             <StackPanel>
                                 <TextBlock Foreground="#7F5757" Text="Battery Discharge" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatteryDischargeText}" />
                             </StackPanel>
                         </Border>
-
-                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#EEF6EA">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#EEF6EA">
                             <StackPanel>
                                 <TextBlock Foreground="#5B7647" Text="Home Usage" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding HomeUsageText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#ECF4FB">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#ECF4FB">
                             <StackPanel>
                                 <TextBlock Foreground="#4A6786" Text="Derived PV output" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding PvGeneratedText}" />
@@ -203,13 +202,13 @@
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridImportText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,0,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
+                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
                                 <TextBlock Foreground="#65507F" Text="Grid Export" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridExportText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3ECFA">
+                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
                                 <TextBlock Foreground="#65507F" Text="Total Grid Export" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridTotalExportText}" />
@@ -225,7 +224,8 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="Recent Trend (Home usage, Derived PV output, Grid import, Grid export)" />
-                            <ScrollViewer Grid.Row="1"
+                            <ScrollViewer x:Name="TrendScrollViewer"
+                                          Grid.Row="1"
                                           Margin="0,14,0,0"
                                           HorizontalScrollBarVisibility="Auto"
                                           VerticalScrollBarVisibility="Auto"
@@ -288,10 +288,78 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <Polyline Stroke="#5B7647" StrokeThickness="3" Points="{Binding HomeUsageTrendPoints}" />
-                                        <Polyline Stroke="#4A6786" StrokeThickness="3" Points="{Binding DerivedPvTrendPoints}" />
-                                        <Polyline Stroke="#8B673E" StrokeThickness="3" Points="{Binding GridImportTrendPoints}" />
-                                        <Polyline Stroke="#65507F" StrokeThickness="3" Points="{Binding GridExportTrendPoints}" />
+                                        <ItemsControl ItemsSource="{Binding HomeUsageTrendSegments}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <Canvas />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemContainerStyle>
+                                                <Style TargetType="ContentPresenter">
+                                                    <Setter Property="Canvas.Left" Value="0" />
+                                                    <Setter Property="Canvas.Top" Value="0" />
+                                                </Style>
+                                            </ItemsControl.ItemContainerStyle>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Polyline Stroke="#5B7647" StrokeThickness="3" Points="{Binding}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <ItemsControl ItemsSource="{Binding DerivedPvTrendSegments}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <Canvas />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemContainerStyle>
+                                                <Style TargetType="ContentPresenter">
+                                                    <Setter Property="Canvas.Left" Value="0" />
+                                                    <Setter Property="Canvas.Top" Value="0" />
+                                                </Style>
+                                            </ItemsControl.ItemContainerStyle>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Polyline Stroke="#4A6786" StrokeThickness="3" Points="{Binding}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <ItemsControl ItemsSource="{Binding GridImportTrendSegments}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <Canvas />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemContainerStyle>
+                                                <Style TargetType="ContentPresenter">
+                                                    <Setter Property="Canvas.Left" Value="0" />
+                                                    <Setter Property="Canvas.Top" Value="0" />
+                                                </Style>
+                                            </ItemsControl.ItemContainerStyle>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Polyline Stroke="#8B673E" StrokeThickness="3" Points="{Binding}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <ItemsControl ItemsSource="{Binding GridExportTrendSegments}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <Canvas />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemContainerStyle>
+                                                <Style TargetType="ContentPresenter">
+                                                    <Setter Property="Canvas.Left" Value="0" />
+                                                    <Setter Property="Canvas.Top" Value="0" />
+                                                </Style>
+                                            </ItemsControl.ItemContainerStyle>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Polyline Stroke="#65507F" StrokeThickness="3" Points="{Binding}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                         <Line x:Name="TrendHoverGuide"
                                               Visibility="Collapsed"
                                               Stroke="#9A9186"
