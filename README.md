@@ -55,6 +55,12 @@ Launch the WPF app:
 dotnet run --project .\src\SolarMonitor.App\
 ```
 
+Build the Windows installer:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\packaging\windows\Build-SolarMonitorInstaller.ps1
+```
+
 Or pass options directly:
 
 ```powershell
@@ -67,3 +73,16 @@ dotnet run --project .\src\SolarMonitor.Console\ -- detail --api-key "your-priva
 - For query-string requests like `device/detail`, the request URL includes the query string but the signature is generated from the base path only.
 - Query endpoints are rate-limited to roughly one call per second per interface, and the client enforces a small minimum interval by default.
 - The WPF app is intentionally thin and reuses the same `SolarMonitor.FoxEss` client as the console.
+
+## Local app settings
+
+- The WPF app now loads and saves the inverter serial number in `%LocalAppData%\SolarMonitor\appsettings.json`.
+- The FoxESS API key is stored separately in `%LocalAppData%\SolarMonitor\secrets.dat` using Windows DPAPI for the current user.
+- Existing `FOXESS_API_KEY` and `FOXESS_INVERTER_SN` environment variables are still used as fallback values when no saved settings exist yet.
+
+## Installer notes
+
+- Installer packaging uses Inno Setup under `packaging\windows`.
+- Versioning is tag-driven through MinVer. Tags should use the `v` prefix, for example `v1.0.0`.
+- The installer checks for the .NET 8 Windows Desktop Runtime and can attempt installation with `winget` before continuing.
+- After installation, the wizard offers to launch `SolarMonitor`.

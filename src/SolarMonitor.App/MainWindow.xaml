@@ -159,7 +159,7 @@
                                   SelectionChanged="RefreshInterval_SelectionChanged" />
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Margin="0,16,0,0" Columns="4">
+                    <UniformGrid Grid.Row="1" Margin="0,16,0,0" Columns="3">
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3F7F1">
                             <StackPanel>
                                 <TextBlock Foreground="#4D6B58" Text="Battery SoC" />
@@ -207,6 +207,12 @@
                             <StackPanel>
                                 <TextBlock Foreground="#65507F" Text="Grid Export" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridExportText}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3ECFA">
+                            <StackPanel>
+                                <TextBlock Foreground="#65507F" Text="Total Grid Export" />
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridTotalExportText}" />
                             </StackPanel>
                         </Border>
                     </UniformGrid>

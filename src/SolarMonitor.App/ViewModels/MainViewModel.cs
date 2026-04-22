@@ -8,6 +8,7 @@ using System.Text.Json;
 using SolarMonitor.Core.Models;
 using SolarMonitor.Core.Services;
 using SolarMonitor.FoxEss;
+using SolarMonitor.App.Configuration;
 
 namespace SolarMonitor.App.ViewModels;
 
@@ -24,8 +25,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
         "SolarMonitor",
         "trend-history.json");
 
-    private string _apiKey = Environment.GetEnvironmentVariable("FOXESS_API_KEY") ?? string.Empty;
-    private string _inverterSerialNumber = Environment.GetEnvironmentVariable("FOXESS_INVERTER_SN") ?? string.Empty;
+    private readonly ConnectionSettingsStore _settingsStore;
+    private string _apiKey = string.Empty;
+    private string _inverterSerialNumber = string.Empty;
     private string _statusMessage = "Ready";
     private string _detailSummaryText = "No device detail loaded yet.";
     private string _detailFunctionsText = string.Empty;
@@ -37,6 +39,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _pvGeneratedText = "(n/a)";
     private string _gridImportText = "(n/a)";
     private string _gridExportText = "(n/a)";
+    private string _gridTotalExportText = "(n/a)";
     private string _footerText = "Enter your FoxESS API key and inverter serial number, then load data.";
     private string _lastUpdatedText = "Not yet";
     private string _realtimeObservedText = "Realtime not loaded yet.";
@@ -53,7 +56,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _timeAxisEndLabel = "--:--";
 
     public MainViewModel()
+        : this(ConnectionSettingsStore.CreateDefault())
     {
+    }
+
+    public MainViewModel(ConnectionSettingsStore settingsStore)
+    {
+        _settingsStore = settingsStore;
+
         RefreshIntervals =
         [
             new RefreshIntervalOption("30 seconds", TimeSpan.FromSeconds(30)),
@@ -63,6 +73,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ];
 
         _selectedRefreshInterval = RefreshIntervals[1];
+        LoadConnectionSettings();
         LoadPersistedTrendHistory();
     }
 
@@ -78,13 +89,25 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string ApiKey
     {
         get => _apiKey;
-        set => SetProperty(ref _apiKey, value);
+        set
+        {
+            if (SetProperty(ref _apiKey, value))
+            {
+                PersistConnectionSettings();
+            }
+        }
     }
 
     public string InverterSerialNumber
     {
         get => _inverterSerialNumber;
-        set => SetProperty(ref _inverterSerialNumber, value);
+        set
+        {
+            if (SetProperty(ref _inverterSerialNumber, value))
+            {
+                PersistConnectionSettings();
+            }
+        }
     }
 
     public string StatusMessage
@@ -151,6 +174,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         get => _gridExportText;
         private set => SetProperty(ref _gridExportText, value);
+    }
+
+    public string GridTotalExportText
+    {
+        get => _gridTotalExportText;
+        private set => SetProperty(ref _gridTotalExportText, value);
     }
 
     public string FooterText
@@ -304,6 +333,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         PvGeneratedText = FormatDerivedPv(realtime);
         GridImportText = FormatMetric(realtime.Metrics, "gridConsumptionPower");
         GridExportText = FormatMetric(realtime.Metrics, "feedinPower");
+        GridTotalExportText = FormatMetric(realtime.Metrics, "feedin2");
         RealtimeObservedText = realtime.ObservedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "FoxESS did not supply a timestamp";
 
         AddTrendSample(realtime);
@@ -462,6 +492,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         return $"{CalculateDerivedPvValue(realtime):0.###} kW (derived)";
     }
 
+    //TODO: logic error to fix
     private static decimal CalculateDerivedPvValue(RealtimeSnapshot realtime)
     {
         var rawPv = realtime.PowerFlow.PvPower ?? GetMetricValue(realtime.Metrics, "pvPower");
@@ -482,7 +513,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
 
         var derivedPv =
-            -(load ?? 0m) +
+            Math.Abs(load ?? 0m) +
             (charge ?? 0m) +
             (export ?? 0m) -
             (discharge ?? 0m) -
@@ -570,15 +601,41 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private void LoadConnectionSettings()
+    {
+        var savedSettings = _settingsStore.Load();
+
+        _apiKey = !string.IsNullOrWhiteSpace(savedSettings.ApiKey)
+            ? savedSettings.ApiKey
+            : Environment.GetEnvironmentVariable("FOXESS_API_KEY") ?? string.Empty;
+
+        _inverterSerialNumber = !string.IsNullOrWhiteSpace(savedSettings.InverterSerialNumber)
+            ? savedSettings.InverterSerialNumber
+            : Environment.GetEnvironmentVariable("FOXESS_INVERTER_SN") ?? string.Empty;
+    }
+
+    private void PersistConnectionSettings()
+    {
+        try
+        {
+            _settingsStore.Save(new AppConnectionSettings(ApiKey, InverterSerialNumber));
+        }
+        catch
+        {
+            // Ignore settings persistence failures; the monitoring experience should keep working.
+        }
+    }
+
+    private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
         {
-            return;
+            return false;
         }
 
         field = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 }
 
