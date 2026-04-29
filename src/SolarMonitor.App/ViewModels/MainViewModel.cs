@@ -9,6 +9,7 @@ using SolarMonitor.Core.Models;
 using SolarMonitor.Core.Services;
 using SolarMonitor.FoxEss;
 using SolarMonitor.App.Configuration;
+using SolarMonitor.App.Localization;
 
 namespace SolarMonitor.App.ViewModels;
 
@@ -30,6 +31,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly ConnectionSettingsStore _settingsStore;
     private string _apiKey = string.Empty;
     private string _inverterSerialNumber = string.Empty;
+    private string _languageCode = AppText.DefaultLanguageCode;
+    private IReadOnlyDictionary<string, string> _texts = AppText.GetStrings(AppText.DefaultLanguageCode);
     private string _statusMessage = "Ready";
     private string _detailSummaryText = "No device detail loaded yet.";
     private string _detailFunctionsText = string.Empty;
@@ -90,6 +93,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public ObservableCollection<RealtimeTrendSample> TrendSamples { get; } = [];
     public ObservableCollection<ChartAxisTick> YAxisTicks { get; } = [];
     public IReadOnlyList<RefreshIntervalOption> RefreshIntervals { get; }
+    public IReadOnlyList<LanguageOption> LanguageOptions => AppText.SupportedLanguages;
+
+    public IReadOnlyDictionary<string, string> Texts
+    {
+        get => _texts;
+        private set => SetProperty(ref _texts, value);
+    }
 
     public string ApiKey
     {
@@ -110,6 +120,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             if (SetProperty(ref _inverterSerialNumber, value))
             {
+                PersistConnectionSettings();
+            }
+        }
+    }
+
+    public string LanguageCode
+    {
+        get => _languageCode;
+        set
+        {
+            if (SetProperty(ref _languageCode, string.IsNullOrWhiteSpace(value) ? AppText.DefaultLanguageCode : value))
+            {
+                Texts = AppText.GetStrings(_languageCode);
                 PersistConnectionSettings();
             }
         }
@@ -685,6 +708,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private void LoadConnectionSettings()
     {
         var savedSettings = _settingsStore.Load();
+        _languageCode = savedSettings.LanguageCode;
+        _texts = AppText.GetStrings(_languageCode);
 
         _apiKey = !string.IsNullOrWhiteSpace(savedSettings.ApiKey)
             ? savedSettings.ApiKey
@@ -699,7 +724,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         try
         {
-            _settingsStore.Save(new AppConnectionSettings(ApiKey, InverterSerialNumber));
+            _settingsStore.Save(new AppConnectionSettings(ApiKey, InverterSerialNumber, LanguageCode));
         }
         catch
         {

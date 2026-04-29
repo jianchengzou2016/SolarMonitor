@@ -145,11 +145,11 @@ public partial class MainWindow : Window
             cardLeft = Math.Max(0, pointX - desiredSize.Width - 12);
         }
 
-        var cardTop = 10d;
+        var cardTop = mousePosition.Y + 12;
         var maxTop = Math.Max(0, _viewModel.ChartCanvasHeight - desiredSize.Height - 8);
         if (cardTop > maxTop)
         {
-            cardTop = maxTop;
+            cardTop = Math.Max(0, mousePosition.Y - desiredSize.Height - 12);
         }
 
         Canvas.SetLeft(TrendHoverCard, cardLeft);

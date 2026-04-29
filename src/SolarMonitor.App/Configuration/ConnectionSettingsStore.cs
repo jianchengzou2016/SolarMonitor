@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using SolarMonitor.App.Localization;
 
 namespace SolarMonitor.App.Configuration;
 
@@ -36,6 +37,7 @@ public sealed class ConnectionSettingsStore
     {
         string inverterSerialNumber = string.Empty;
         string apiKey = string.Empty;
+        string languageCode = AppText.DefaultLanguageCode;
 
         try
         {
@@ -44,6 +46,9 @@ public sealed class ConnectionSettingsStore
                 var json = File.ReadAllText(_settingsPath);
                 var payload = JsonSerializer.Deserialize<AppSettingsPayload>(json, JsonOptions);
                 inverterSerialNumber = payload?.InverterSerialNumber?.Trim() ?? string.Empty;
+                languageCode = string.IsNullOrWhiteSpace(payload?.LanguageCode)
+                    ? AppText.DefaultLanguageCode
+                    : payload.LanguageCode.Trim();
             }
         }
         catch
@@ -65,7 +70,7 @@ public sealed class ConnectionSettingsStore
             apiKey = string.Empty;
         }
 
-        return new AppConnectionSettings(apiKey, inverterSerialNumber);
+        return new AppConnectionSettings(apiKey, inverterSerialNumber, languageCode);
     }
 
     public void Save(AppConnectionSettings settings)
@@ -74,7 +79,10 @@ public sealed class ConnectionSettingsStore
 
         var payload = new AppSettingsPayload
         {
-            InverterSerialNumber = settings.InverterSerialNumber.Trim()
+            InverterSerialNumber = settings.InverterSerialNumber.Trim(),
+            LanguageCode = string.IsNullOrWhiteSpace(settings.LanguageCode)
+                ? AppText.DefaultLanguageCode
+                : settings.LanguageCode.Trim()
         };
 
         var json = JsonSerializer.Serialize(payload, JsonOptions);
@@ -98,5 +106,7 @@ public sealed class ConnectionSettingsStore
     private sealed class AppSettingsPayload
     {
         public string? InverterSerialNumber { get; init; }
+
+        public string? LanguageCode { get; init; }
     }
 }

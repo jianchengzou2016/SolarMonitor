@@ -17,12 +17,13 @@ public sealed class ConnectionSettingsStoreTests : IDisposable
     {
         var store = CreateStore();
 
-        store.Save(new AppConnectionSettings("test-api-key", " inverter-001 "));
+        store.Save(new AppConnectionSettings("test-api-key", " inverter-001 ", "zh-CN"));
 
         var loaded = store.Load();
 
         Assert.Equal("test-api-key", loaded.ApiKey);
         Assert.Equal("inverter-001", loaded.InverterSerialNumber);
+        Assert.Equal("zh-CN", loaded.LanguageCode);
     }
 
     [Fact]
@@ -46,6 +47,7 @@ public sealed class ConnectionSettingsStoreTests : IDisposable
 
         Assert.Equal(string.Empty, loaded.ApiKey);
         Assert.Equal(string.Empty, loaded.InverterSerialNumber);
+        Assert.Equal("en-AU", loaded.LanguageCode);
     }
 
     public void Dispose()

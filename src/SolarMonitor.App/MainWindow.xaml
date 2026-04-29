@@ -30,15 +30,15 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <TextBlock FontSize="28" FontWeight="SemiBold" Foreground="#F7F1E6" Text="SolarMonitor" />
-                    <TextBlock Margin="0,6,0,0" FontSize="14" Foreground="#C6D6CD" Text="Read-only FoxESS explorer for your inverter and battery stack." />
+                    <TextBlock Margin="0,6,0,0" FontSize="14" Foreground="#C6D6CD" Text="{Binding Texts[AppDescription]}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="18,0,0,0" VerticalAlignment="Center">
-                    <TextBlock FontSize="12" Foreground="#A9C4B6" Text="Connection status" />
+                    <TextBlock FontSize="12" Foreground="#A9C4B6" Text="{Binding Texts[ConnectionStatus]}" />
                     <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="#F7F1E6" Text="{Binding StatusMessage}" />
                 </StackPanel>
                 <Border Grid.Column="2" Margin="18,0,0,0" Padding="14,10" VerticalAlignment="Center" CornerRadius="14" Background="#254F43">
                     <StackPanel>
-                        <TextBlock Foreground="#A9C4B6" FontSize="12" Text="Last refresh" />
+                        <TextBlock Foreground="#A9C4B6" FontSize="12" Text="{Binding Texts[LastRefresh]}" />
                         <TextBlock Foreground="#F7F1E6" FontSize="15" FontWeight="SemiBold" Text="{Binding LastUpdatedText}" />
                     </StackPanel>
                 </Border>
@@ -53,18 +53,25 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" FontWeight="SemiBold" Text="FoxESS API key" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Margin="16,0,0,6" FontWeight="SemiBold" Text="Inverter serial number" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" FontWeight="SemiBold" Text="{Binding Texts[ApiKey]}" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Margin="16,0,0,6" FontWeight="SemiBold" Text="{Binding Texts[InverterSerialNumber]}" />
+                <TextBlock Grid.Row="0" Grid.Column="5" Margin="12,0,0,6" FontWeight="SemiBold" Text="{Binding Texts[Language]}" />
                 <TextBox Grid.Row="1" Grid.Column="0" Height="36" Padding="10,6" VerticalContentAlignment="Center" Background="#FFFDF8" BorderBrush="#C9BFAF" Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBox Grid.Row="1" Grid.Column="1" Margin="16,0,0,0" Height="36" Padding="10,6" VerticalContentAlignment="Center" Background="#FFFDF8" BorderBrush="#C9BFAF" Text="{Binding InverterSerialNumber, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Row="1" Grid.Column="2" Margin="16,0,0,0" Padding="18,8" Click="LoadDevices_Click" Content="Load Devices" />
-                <Button Grid.Row="1" Grid.Column="3" Margin="12,0,0,0" Padding="18,8" Click="LoadDetail_Click" Content="Load Detail" />
-                <Button Grid.Row="1" Grid.Column="4" Margin="12,0,0,0" Padding="18,8" Click="LoadRealtime_Click" Content="Load Realtime" />
+                <Button Grid.Row="1" Grid.Column="2" Margin="16,0,0,0" Padding="18,8" Click="LoadDevices_Click" Content="{Binding Texts[LoadDevices]}" />
+                <Button Grid.Row="1" Grid.Column="3" Margin="12,0,0,0" Padding="18,8" Click="LoadDetail_Click" Content="{Binding Texts[LoadDetail]}" />
+                <Button Grid.Row="1" Grid.Column="4" Margin="12,0,0,0" Padding="18,8" Click="LoadRealtime_Click" Content="{Binding Texts[LoadRealtime]}" />
+                <ComboBox Grid.Row="1" Grid.Column="5" Margin="12,0,0,0" Width="118" Height="36"
+                          ItemsSource="{Binding LanguageOptions}"
+                          DisplayMemberPath="DisplayName"
+                          SelectedValuePath="Code"
+                          SelectedValue="{Binding LanguageCode, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
         </Border>
 
@@ -86,7 +93,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="Devices" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[Devices]}" />
                         <ListView Grid.Row="1" Margin="0,14,0,0" ItemsSource="{Binding Devices}">
                             <ListView.View>
                                 <GridView>
@@ -105,7 +112,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="Device Detail" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[DeviceDetail]}" />
                         <StackPanel Grid.Row="1" Margin="0,12,0,0">
                             <TextBlock TextWrapping="Wrap" Text="{Binding DetailSummaryText}" />
                             <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" Text="{Binding DetailFunctionsText}" />
@@ -139,7 +146,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="Realtime Dashboard" />
+                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[RealtimeDashboard]}" />
                             <TextBlock Margin="0,4,0,0" Foreground="#5E6B63" Text="{Binding RealtimeObservedText}" />
                         </StackPanel>
                         <CheckBox Grid.Column="1"
@@ -148,7 +155,7 @@
                                   IsChecked="{Binding IsAutoRefreshEnabled}"
                                   Checked="RefreshToggle_Changed"
                                   Unchecked="RefreshToggle_Changed"
-                                  Content="Auto refresh" />
+                                  Content="{Binding Texts[AutoRefresh]}" />
                         <ComboBox Grid.Column="2"
                                   Margin="12,0,0,0"
                                   Width="120"
@@ -162,55 +169,55 @@
                     <UniformGrid Grid.Row="1" Margin="0,16,0,0" Columns="3">
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3F7F1">
                             <StackPanel>
-                                <TextBlock Foreground="#4D6B58" Text="Battery SoC" />
+                                <TextBlock Foreground="#4D6B58" Text="{Binding Texts[BatterySoc]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatterySocText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F6F1EA">
                             <StackPanel>
-                                <TextBlock Foreground="#7A6040" Text="Battery Temp" />
+                                <TextBlock Foreground="#7A6040" Text="{Binding Texts[BatteryTemp]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatteryTemperatureText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#EEF5F8">
                             <StackPanel>
-                                <TextBlock Foreground="#476C7A" Text="Battery SOH" />
+                                <TextBlock Foreground="#476C7A" Text="{Binding Texts[BatterySoh]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatterySohText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F8F0F0">
                             <StackPanel>
-                                <TextBlock Foreground="#7F5757" Text="Battery Discharge" />
+                                <TextBlock Foreground="#7F5757" Text="{Binding Texts[BatteryDischarge]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatteryDischargeText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#EEF6EA">
                             <StackPanel>
-                                <TextBlock Foreground="#5B7647" Text="Home Usage" />
+                                <TextBlock Foreground="#5B7647" Text="{Binding Texts[HomeUsage]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding HomeUsageText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#ECF4FB">
                             <StackPanel>
-                                <TextBlock Foreground="#4A6786" Text="Derived PV output" />
+                                <TextBlock Foreground="#4A6786" Text="{Binding Texts[DerivedPvOutput]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding PvGeneratedText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#FBF1E5">
                             <StackPanel>
-                                <TextBlock Foreground="#8B673E" Text="Grid Import" />
+                                <TextBlock Foreground="#8B673E" Text="{Binding Texts[GridImport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridImportText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
-                                <TextBlock Foreground="#65507F" Text="Grid Export" />
+                                <TextBlock Foreground="#65507F" Text="{Binding Texts[GridExport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridExportText}" />
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
-                                <TextBlock Foreground="#65507F" Text="Total Grid Export" />
+                                <TextBlock Foreground="#65507F" Text="{Binding Texts[TotalGridExport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridTotalExportText}" />
                             </StackPanel>
                         </Border>
@@ -223,7 +230,7 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="Recent Trend (Home usage, Derived PV output, Grid import, Grid export)" />
+                            <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[RecentTrend]}" />
                             <ScrollViewer x:Name="TrendScrollViewer"
                                           Grid.Row="1"
                                           Margin="0,14,0,0"
@@ -415,7 +422,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="Recent Refreshes" />
+                                <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[RecentRefreshes]}" />
                                 <ListView Grid.Row="1" Margin="0,12,0,0" ItemsSource="{Binding TrendSamples}">
                                     <ListView.View>
                                         <GridView>
@@ -436,7 +443,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="All Realtime Metrics" />
+                                <TextBlock FontWeight="SemiBold" Foreground="#14342B" Text="{Binding Texts[AllRealtimeMetrics]}" />
                                 <ListView Grid.Row="1" Margin="0,12,0,0" ItemsSource="{Binding RealtimeMetrics}">
                                     <ListView.View>
                                         <GridView>
