@@ -166,7 +166,7 @@
                                   SelectionChanged="RefreshInterval_SelectionChanged" />
                     </Grid>
 
-                    <UniformGrid Grid.Row="1" Margin="0,16,0,0" Columns="3">
+                    <UniformGrid Grid.Row="1" Margin="0,16,0,0" Columns="4">
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3F7F1">
                             <StackPanel>
                                 <TextBlock Foreground="#4D6B58" Text="{Binding Texts[BatterySoc]}" />
@@ -183,6 +183,12 @@
                             <StackPanel>
                                 <TextBlock Foreground="#476C7A" Text="{Binding Texts[BatterySoh]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding BatterySohText}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#FBF1E5">
+                            <StackPanel>
+                                <TextBlock Foreground="#8B673E" Text="{Binding Texts[InverterTemperature]}"/>
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding InverterTemperatureText}"/>
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F8F0F0">
@@ -203,24 +209,24 @@
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding PvGeneratedText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#FBF1E5">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#FBF1E5">
                             <StackPanel>
                                 <TextBlock Foreground="#8B673E" Text="{Binding Texts[GridImport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridImportText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
                                 <TextBlock Foreground="#65507F" Text="{Binding Texts[GridExport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridExportText}" />
                             </StackPanel>
                         </Border>
-                        <Border Margin="0,0,10,0" Padding="12" CornerRadius="14" Background="#F3ECFA">
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F3ECFA">
                             <StackPanel>
                                 <TextBlock Foreground="#65507F" Text="{Binding Texts[TotalGridExport]}" />
                                 <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding GridTotalExportText}" />
                             </StackPanel>
-                        </Border>
+                        </Border>                        
                     </UniformGrid>
 
                     <Border Grid.Row="2" Margin="0,16,0,0" Padding="14" CornerRadius="16" Background="#FAF7F1">

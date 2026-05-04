@@ -39,6 +39,7 @@ public static class AppText
         ["GridImport"] = "Grid Import",
         ["GridExport"] = "Grid Export",
         ["TotalGridExport"] = "Total Grid Export",
+        ["InverterTemperature"] = "Inverter Temperature",
         ["RecentTrend"] = "Recent Trend (Home usage, Derived PV output, Grid import, Grid export)",
         ["RecentRefreshes"] = "Recent Refreshes",
         ["AllRealtimeMetrics"] = "All Realtime Metrics"
@@ -68,6 +69,7 @@ public static class AppText
         ["GridImport"] = "电网输入",
         ["GridExport"] = "电网输出",
         ["TotalGridExport"] = "累计电网输出",
+        ["InverterTemperature"] = "逆变器温度",
         ["RecentTrend"] = "近期趋势（家庭用电、推算光伏输出、电网输入、电网输出）",
         ["RecentRefreshes"] = "近期刷新",
         ["AllRealtimeMetrics"] = "全部实时指标"

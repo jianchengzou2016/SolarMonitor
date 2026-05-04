@@ -45,6 +45,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private string _gridImportText = "(n/a)";
     private string _gridExportText = "(n/a)";
     private string _gridTotalExportText = "(n/a)";
+    private string _inverterTemperatureText = "(n/a)";
     private string _footerText = "Enter your FoxESS API key and inverter serial number, then load data.";
     private string _lastUpdatedText = "Not yet";
     private string _realtimeObservedText = "Realtime not loaded yet.";
@@ -208,6 +209,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         get => _gridTotalExportText;
         private set => SetProperty(ref _gridTotalExportText, value);
+    }
+
+    //_inveterTemperatureText
+    public string InverterTemperatureText
+    {
+        get => _inverterTemperatureText;
+        private set => SetProperty(ref _inverterTemperatureText, value);
     }
 
     public string FooterText
@@ -374,6 +382,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         GridImportText = FormatMetric(realtime.Metrics, "gridConsumptionPower");
         GridExportText = FormatMetric(realtime.Metrics, "feedinPower");
         GridTotalExportText = FormatMetric(realtime.Metrics, "feedin2");
+        InverterTemperatureText = FormatMetric(realtime.Metrics, "invTemperation");
         RealtimeObservedText = realtime.ObservedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "FoxESS did not supply a timestamp";
 
         AddTrendSample(realtime);
