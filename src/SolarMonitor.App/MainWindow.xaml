@@ -187,8 +187,14 @@
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#FBF1E5">
                             <StackPanel>
-                                <TextBlock Foreground="#8B673E" Text="{Binding Texts[InverterTemperature]}"/>
-                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding InverterTemperatureText}"/>
+                                <TextBlock Foreground="#8B673E" Text="{Binding Texts[InverterFinTemperature]}"/>
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding InverterFinTemperatureText}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#FBF1E5">
+                            <StackPanel>
+                                <TextBlock Foreground="#8B673E" Text="{Binding Texts[InverterCoreTemperature]}"/>
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="{Binding InverterCoreTemperatureText}"/>
                             </StackPanel>
                         </Border>
                         <Border Margin="0,0,10,10" Padding="12" CornerRadius="14" Background="#F8F0F0">
