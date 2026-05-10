@@ -1,12 +1,18 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SolarMonitor.App;
 
 public partial class MainWindow : Window
 {
+    private static readonly Brush HomeUsageBrush = new SolidColorBrush(Color.FromRgb(0x1D, 0x4E, 0xD8));
+    private static readonly Brush DerivedPvBrush = new SolidColorBrush(Color.FromRgb(0x15, 0x80, 0x3D));
+    private static readonly Brush GridImportBrush = new SolidColorBrush(Color.FromRgb(0xDC, 0x26, 0x26));
+    private static readonly Brush GridExportBrush = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27));
     private readonly ViewModels.MainViewModel _viewModel = new();
     private readonly DispatcherTimer _refreshTimer = new();
     private bool _isRefreshingRealtime;
@@ -129,12 +135,7 @@ public partial class MainWindow : Window
         TrendHoverGuide.X1 = pointX;
         TrendHoverGuide.X2 = pointX;
 
-        TrendHoverText.Text =
-            $"{sample.Timestamp:dd MMM yyyy HH:mm}\n" +
-            $"Home usage: {sample.HomeUsagePower:0.###} kW\n" +
-            $"Derived PV output: {sample.DerivedPvOutputPower:0.###} kW\n" +
-            $"Grid Import: {sample.GridImportPower:0.###} kW\n" +
-            $"Grid Export: {sample.GridExportPower:0.###} kW";
+        UpdateTrendHoverText(sample);
 
         TrendHoverCard.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         var desiredSize = TrendHoverCard.DesiredSize;
@@ -217,6 +218,21 @@ public partial class MainWindow : Window
     {
         TrendHoverGuide.Visibility = Visibility.Collapsed;
         TrendHoverCard.Visibility = Visibility.Collapsed;
+    }
+
+    private void UpdateTrendHoverText(ViewModels.RealtimeTrendSample sample)
+    {
+        TrendHoverText.Inlines.Clear();
+        TrendHoverText.Inlines.Add(new Run($"{sample.Timestamp:dd MMM yyyy HH:mm}\n"));
+        AddHoverLine(_viewModel.Texts["HomeUsage"], sample.HomeUsagePower, HomeUsageBrush);
+        AddHoverLine(_viewModel.Texts["DerivedPvOutput"], sample.DerivedPvOutputPower, DerivedPvBrush);
+        AddHoverLine(_viewModel.Texts["GridImport"], sample.GridImportPower, GridImportBrush);
+        AddHoverLine(_viewModel.Texts["GridExport"], sample.GridExportPower, GridExportBrush);
+    }
+
+    private void AddHoverLine(string label, decimal value, Brush brush)
+    {
+        TrendHoverText.Inlines.Add(new Run($"{label}: {value:0.###} kW\n") { Foreground = brush });
     }
 
     private void ScrollTrendToLatest()
